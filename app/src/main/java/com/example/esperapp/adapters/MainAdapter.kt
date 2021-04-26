@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.esperapp.R
 
-class MainAdapter(var adapterList:ArrayList<MobileAdapter> )  :RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MainAdapter(var adapterList:ArrayList<MobileAdapter>)  :RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val itemView= LayoutInflater.from(parent.context).
@@ -28,7 +28,9 @@ class MainAdapter(var adapterList:ArrayList<MobileAdapter> )  :RecyclerView.Adap
         return adapterList.size
     }
 
-    class MainDataViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+   inner class MainDataViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         var recyclerView: RecyclerView =itemView.findViewById(R.id.optionListRecyclerView)
-    }
+
+   }
+
 }
