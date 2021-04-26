@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">EsperApp</string>
+    <string name="submit">Submit</string>
+    <string name="response_failure">Network Response Failure</string>
+    <string name="combination_alert">Sorry! Combination is not available</string>
+    <string name="mobile_label">Mobile</string>
+    <string name="storage_label">Storage</string>
+    <string name="other_feature_label">Other Features</string>
 </resources>
