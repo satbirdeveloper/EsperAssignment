@@ -14,12 +14,12 @@ import com.google.android.material.card.MaterialCardView
 import com.squareup.picasso.Picasso
 
 class MobileAdapter (var dataList:ArrayList<OptionsDataClass>,private val context:Context,
-                    val optionSelected: (featureId:String,optionId:String) ->Unit )  :RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                    val optionSelected: (featureId:String,optionId:String,featurePosition:Int,optionPosition:Int) ->Unit )  :RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var previousPos=0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val itemView= LayoutInflater.from(parent.context).
+        val itemView= LayoutInflater.from(context).
         inflate(R.layout.phone_data_row,parent,false)
         return PhoneDataViewHolder(itemView)
     }
@@ -53,7 +53,8 @@ class MobileAdapter (var dataList:ArrayList<OptionsDataClass>,private val contex
         init {
             cardViewContainer.setOnClickListener {
                 highlightBackground()
-                optionSelected(dataList[absoluteAdapterPosition].featureId,dataList[absoluteAdapterPosition].id)
+                optionSelected(dataList[absoluteAdapterPosition].featureId,dataList[absoluteAdapterPosition].id,
+                    dataList[absoluteAdapterPosition].featurePosition,absoluteAdapterPosition)
             }
         }
 

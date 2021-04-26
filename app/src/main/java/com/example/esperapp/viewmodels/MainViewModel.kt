@@ -19,17 +19,18 @@ import kotlinx.coroutines.launch
     var optionsList=ArrayList<ArrayList<OptionsDataClass>>()
     var phoneData:MobileDataClass?=null
    private val selectedFeatureAndOption=HashMap<String,String>()
+      val selectedPositions=HashMap<Int,Int>()
    private val selectedCombinations=ArrayList<Combination<String>>()
     private val givenExclusionCombinations=ArrayList<Combination<String>>()
-   private var selectedFeature=""
-    private var selectedOption=""
-    private lateinit var isValidCombination:(isValid:Boolean)->Unit
+     private lateinit var isValidCombination:(isValid:Boolean)->Unit
 
 
     fun getPhoneDisplayList( context: Context, success:()-> Unit, failure:()-> Unit,
-    isValidCombination:(isValid:Boolean)->Unit){
+                                                            isValidCombination:(isValid:Boolean)->Unit){
 
         this.isValidCombination=isValidCombination
+
+        //starting coroutine for fetching mobile data from web server
         viewModelScope.launch {
             try {
                  phoneData=PhoneRepos().getPhoneData()
@@ -37,13 +38,13 @@ import kotlinx.coroutines.launch
                     dataArrangementOnSuccess(context,data)
                     success()
                 } ?: run{
-                    Log.e("Data Failure","Data Failure")
-                     failure()
+
+                    failure()
                 }
             }
 
             catch (e:Exception){
-                Log.e("Network Failure","Exception: ${e.message}")
+
                 failure()
             }
 
@@ -52,22 +53,24 @@ import kotlinx.coroutines.launch
 
 
     private fun dataArrangementOnSuccess(context:Context,data:MobileDataClass){
-        optionsList.clear()
-        adapterArrayList.clear()
-        givenExclusionCombinations.clear()
-        selectedFeatureAndOption.clear()
+        clearData()
+        var counter=0
 
+        //fetching option list
         for (feature in data.features){
 
-            for (option in feature.options)
-                option.featureId=feature.feature_id
-
+            for (option in feature.options) {
+                option.featureId = feature.feature_id
+                option.featurePosition=counter
+            }
+            counter++
             optionsList.add(feature.options)
         }
+
+        //creating adapters for displaying option for features
         for (options in optionsList){
-            adapterArrayList.add(MobileAdapter(options,context) { featureId,optionId -> selectedOption=optionId
-                selectedFeature=featureId
-                dataSelected()})
+            adapterArrayList.add(MobileAdapter(options,context)
+            { featureId,optionId,featurePos,optionPos -> dataSelected(featureId,optionId,featurePos,optionPos) })
         }
 
         fetchExclusionCombinations()
@@ -88,18 +91,12 @@ import kotlinx.coroutines.launch
          }
      }
 
-   private fun dataSelected(){
-        Log.e("Op_Sel","Op_Sel: $selectedOption")
-        Log.e("Fe_Sel","Fe_Sel: $selectedFeature")
+   private fun dataSelected(selectedFeature:String,selectedOption:String,featurePos:Int,optionPos:Int){
 
             selectedFeatureAndOption[selectedFeature] = selectedOption
+            selectedPositions[featurePos] = optionPos
 
         if(adapterArrayList.size==selectedFeatureAndOption.size){
-            Log.e("Do_Exclusions","Do_Exclusions")
-            for (selectedData in selectedFeatureAndOption){
-                Log.e("selectedKey","selectedKey: ${selectedData.key} ")
-                Log.e("selectedValue","selectedValue:  ${selectedData.value}")
-            }
             selectedCombinations.clear()
             checkForExclusions()
         }
@@ -111,16 +108,15 @@ import kotlinx.coroutines.launch
     }
 
     private fun createCombination(){
+        //creating combination for selected options
         for (x in 0 until selectedFeatureAndOption.size){
+
             for (y in x+1 until selectedFeatureAndOption.size){
                 var xKey=selectedFeatureAndOption.keys.toTypedArray()[x]
                 var yKey=selectedFeatureAndOption.keys.toTypedArray()[y]
                 selectedCombinations.add(Combination(selectedFeatureAndOption.getValue(xKey),
                                                         selectedFeatureAndOption.getValue(yKey) ))
 
-                Log.e("Combination","First: ${selectedFeatureAndOption.getValue(xKey)}")
-                Log.e("Combination","Second: ${selectedFeatureAndOption.getValue(yKey)}")
-                Log.e("----------","-------------")
             }
         }
     }
@@ -131,20 +127,26 @@ import kotlinx.coroutines.launch
             for (select in selectedCombinations){
                 for (given in givenExclusionCombinations){
                     if(select.isEquals(given)){
-                        Log.e("Sorry Not Available","Sorry Not Available")
+                        //not valid combination
                         isValidCombination(false)
                         return
                     }
 
                 }
             }
+
             //valid combination- show detail
-            Log.e("Available","Available show detail")
             isValidCombination(true)
 
     }
 
-
+            private fun clearData(){
+                optionsList.clear()
+                adapterArrayList.clear()
+                givenExclusionCombinations.clear()
+                selectedFeatureAndOption.clear()
+                selectedPositions.clear()
+            }
 
 
 }

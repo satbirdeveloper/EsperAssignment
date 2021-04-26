@@ -1,5 +1,6 @@
 package com.example.esperapp.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -33,11 +34,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpListeners(){
         mainBinding.swipeRefreshLayout.setOnRefreshListener {
+            mainBinding.submitButton.visibility=View.GONE
             firePhoneApi()
         }
 
         mainBinding.submitButton.setOnClickListener {
-
+            val intent=Intent(this,PhoneDetailActivity::class.java)
+            intent.putExtra("PhoneDetailData",mainViewModel.phoneData?.features)
+            intent.putExtra("SelectedPhoneData",mainViewModel.selectedPositions)
+            startActivity(intent)
         }
     }
 
@@ -45,12 +50,10 @@ class MainActivity : AppCompatActivity() {
         mainBinding.swipeRefreshLayout.isRefreshing=true
 
         mainViewModel.getPhoneDisplayList(this,{mainAdapter.notifyDataSetChanged()},
-
-            {Snackbar.make(
+                {Snackbar.make(
                 mainBinding.swipeRefreshLayout,getString(
                     R.string.response_failure),Snackbar.LENGTH_LONG).show()},
-
-            {isValid ->  displayDetail(isValid)})
+                {isValid ->  displayDetail(isValid)})
 
         mainBinding.swipeRefreshLayout.isRefreshing=false
     }
